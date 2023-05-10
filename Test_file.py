@@ -21,6 +21,7 @@ bot = telebot.TeleBot(TOKEN)
 # Обрабатываются все сообщения, содержащие команды '/start' or '/help'.
 @bot.message_handler(commands=['start', 'help'])
 def repeat(message: telebot.types.Message):
+    print(message.text)
     bot.reply_to(message, f"Привет, дорогой {message.chat.username}")
 
 # Обрабатываются все документы и аудиозаписи
