@@ -1,5 +1,7 @@
 import requests
 import json
+import lxml.html
+from lxml import etree
                                             # Request запросы:
 
 # r = requests.get('https://baconipsum.com/api/?type=meat-and-filler')
@@ -32,8 +34,30 @@ import json
 #
 # print(r.content)
 
-request_API = requests.get('https://baconipsum.com/api/?type=meat-and-filler')
-texts = json.loads(request_API.content)
+# request_API = requests.get('https://baconipsum.com/api/?type=meat-and-filler')
+# texts = json.loads(request_API.content)
+#
+# for text in texts:  # выводим полученный текст. Но для того чтобы он влез в консоль оставим только первые 50 символов.
+#     print(text[:50],'\n')
 
-for text in texts:  # выводим полученный текст. Но для того чтобы он влез в консоль оставим только первые 50 символов.
-    print(text[:50],'\n')
+                                        # 23.4 Парсинг данных с сайтов
+
+# 1.
+# html = requests.get('https://www.python.org/').content
+# tree = lxml.html.document_fromstring(html)
+# title = tree.xpath('/html/head/title/text()')
+# print(title)
+
+# 2.
+import requests
+import json
+import lxml.html
+from lxml import etree
+
+tree = etree.parse('Welcome to Python.org.html', lxml.html.HTMLParser())
+ul = tree.findall('body/div/div[3]/div/section/div[3]/div[1]/div/ul/li')
+
+for li in ul:
+    a = li.find('a')
+    print(a.text)
+
