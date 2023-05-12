@@ -34,14 +34,33 @@ def repeat(message: telebot.types.Message):
 
 @bot.message_handler(content_types=['text', ])
 def get_price(message: telebot.types.Message):
-    # доллар рубль 1
     values = message.text.split(' ')
-    if len(values) > 3:
-        raise ConvertionException('Друг, ты ввел более трех параметров, надо вот так (Пример): доллар рубль 1 ')
 
+    if len(values) > 3:
+        raise ConvertionException('Друг, ты ввел более трех параметров, надо вот так (Пример): доллар рубль 1')
     base, quote, amount = values
 
-    r = requests.get(f'https://min-api.cryptocompare.com/data/price?fsym={keys[base]}&tsyms={keys[quote]}')
+    if base == quote:
+        raise ConvertionException(f'Друг, ты конвертируешь одинаковые валюты {quote}. Надо вот так (Пример): доллар рубль 1')
+
+    try:
+        base_ticker = keys[base]
+    except KeyError:
+        raise ConvertionException(f'Не удалось обработать валюту {base}.')
+
+    try:
+        quote_ticker = keys[quote]
+    except KeyError:
+        raise ConvertionException(f'Не удалось обработать валюту {quote}.')
+
+    try:
+        amount = float(amount)
+    except ValueError:
+        raise ConvertionException(f'Не удалось обработать количество валюты {quote}.')
+
+    base_ticker, quote_ticker = keys[base], keys[quote]
+
+    r = requests.get(f'https://min-api.cryptocompare.com/data/price?fsym={base_ticker}&tsyms={quote_ticker}')
     total_quote = json.loads(r.content)[keys[quote]]
     text = f'Цена {amount} {base} в {quote} равна - {total_quote}'
     bot.send_message(message.chat.id, text)
