@@ -7,9 +7,12 @@ bot = telebot.TeleBot(TOKEN)
 
 keys = {
     'рубль': 'RUB',
-    'eвро': 'EUR',
+    'евро': 'EUR',
     'доллар': 'USD'
 }
+
+class ConvertionException(Exception):
+    pass
 
 @bot.message_handler(commands=['start', 'help'])
 def repeat(message: telebot.types.Message):
@@ -18,7 +21,8 @@ def repeat(message: telebot.types.Message):
            f'Для начала работы введите данные в следующем формате:\n' \
            f' <продаваемая валюта> <покупаемая валюта> <количество продаваемой валюты>.\n' \
            f'Пример ввода: \n' \
-           f'Нажмите /values чтобы увидеть список достпных валют.'
+           f'доллар рубль 1' \
+           f'Нажмите /values чтобы увидеть список доступных валют.'
     bot.reply_to(message, text)
 
 @bot.message_handler(commands=['values'])
@@ -31,8 +35,15 @@ def repeat(message: telebot.types.Message):
 @bot.message_handler(content_types=['text', ])
 def get_price(message: telebot.types.Message):
     # доллар рубль 1
-    base, quote, amount = message.text.split(' ')
+    values = message.text.split(' ')
+    if len(values) > 3:
+        raise ConvertionException('Друг, ты ввел более трех параметров, надо вот так (Пример): доллар рубль 1 ')
+
+    base, quote, amount = values
+
     r = requests.get(f'https://min-api.cryptocompare.com/data/price?fsym={keys[base]}&tsyms={keys[quote]}')
-    text = json.loads()
+    total_quote = json.loads(r.content)[keys[quote]]
+    text = f'Цена {amount} {base} в {quote} равна - {total_quote}'
+    bot.send_message(message.chat.id, text)
 
 bot.polling(none_stop=True)
